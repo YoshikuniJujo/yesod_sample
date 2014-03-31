@@ -1,8 +1,8 @@
-module Params (getParams) where
+module Params (makeParams) where
 
 import Prelude
 
-import Control.Applicative
+-- import Control.Applicative
 import Data.Either
 import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString as B
@@ -18,11 +18,8 @@ import Network.TLS.Extra (
 	cipher_AES128_SHA1, cipher_AES256_SHA1,
 	cipher_RC4_128_MD5, cipher_RC4_128_SHA1)
 
-getParams :: FilePath -> FilePath -> IO Params
-getParams cf kf = do
-	certs <- readCertificates cf
-	pk <- readPrivateKey kf
-	return $ mkParams certs pk
+makeParams :: B.ByteString -> B.ByteString -> Params
+makeParams cc kc = mkParams (parseCertificates cc) (parsePrivateKey kc)
 
 mkParams :: [X509] -> PrivateKey -> Params
 mkParams certs pk =
@@ -33,9 +30,8 @@ mkParams certs pk =
 			pCertificates = zip certs $ (Just pk) : repeat Nothing
 		 }
 
-readCertificates :: FilePath -> IO [X509]
-readCertificates filepath = do
-	rights . parseCerts . pemParseBS <$> B.readFile filepath
+parseCertificates :: B.ByteString -> [X509]
+parseCertificates = rights . parseCerts . pemParseBS
 
 parseCerts :: Either String [PEM] -> [Either String X509]
 parseCerts (Right pems) =
@@ -43,9 +39,8 @@ parseCerts (Right pems) =
 		(flip elem ["CERTIFICATE", "TRUSTED CERTIFICATE"] . pemName) pems
 parseCerts (Left err) = error $ "cannot parse PEM file: " ++ err
 
-readPrivateKey :: FilePath -> IO PrivateKey
-readPrivateKey filepath = head <$>
-	rights . parseKey . pemParseBS <$> B.readFile filepath
+parsePrivateKey :: B.ByteString -> PrivateKey
+parsePrivateKey = head . rights . parseKey . pemParseBS
 
 parseKey :: Either String [PEM] -> [Either String PrivateKey]
 parseKey (Right pems) =

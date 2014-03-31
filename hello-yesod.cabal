@@ -95,6 +95,7 @@ executable         hello-yesod
                      , network-conduit
                      , warp
                      , warp-tls
+                     , bytestring
 
     ghc-options:       -threaded -O2
 
