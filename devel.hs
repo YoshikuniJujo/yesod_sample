@@ -1,7 +1,7 @@
 {-# LANGUAGE PackageImports #-}
-import "hello-yesod" Application (getApplicationDev)
+import "hello-yesod2" Application (getApplicationDev)
 import Network.Wai.Handler.Warp
-    (runSettings, defaultSettings, setPort)
+    (runSettings, defaultSettings, settingsPort)
 import Control.Concurrent (forkIO)
 import System.Directory (doesFileExist, removeFile)
 import System.Exit (exitSuccess)
@@ -11,7 +11,9 @@ main :: IO ()
 main = do
     putStrLn "Starting devel application"
     (port, app) <- getApplicationDev
-    forkIO $ runSettings (setPort port defaultSettings) app
+    forkIO $ runSettings defaultSettings
+        { settingsPort = port
+        } app
     loop
 
 loop :: IO ()

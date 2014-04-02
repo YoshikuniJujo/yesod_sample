@@ -1,4 +1,4 @@
-exec: ../dist/build/hello-yesod/hello-yesod
+exec: ../dist/build/hello-yesod2/hello-yesod2
 args:
     - production
 host: <<HOST-NOT-SET>>
